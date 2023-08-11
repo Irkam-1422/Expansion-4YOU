@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const config = require('config')
+const path = require('path')
 const fileUpload = require('express-fileupload')
 
 const PORT = config.get('port') || 5000
@@ -15,7 +16,14 @@ app.use('/api/article', require('./routes/article.routes'))
 app.use('/api/content', require('./routes/content.routes'))
 app.use('/api/casestudy', require('./routes/casestudy.routes'))
 app.use('/api/email', require('./routes/email.routes'))  
-app.use(fileUpload({}))
+
+if (process.env.NODE_ENV === 'production') {
+    app.use('/', express.static(path.join(__dirname, 'client', 'build')))
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+    })
+}
 
 async function start() { 
     try {
